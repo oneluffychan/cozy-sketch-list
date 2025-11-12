@@ -7,8 +7,6 @@ import { toast } from "sonner";
 import { LogOut, Sparkles } from "lucide-react";
 import AnimeSearch from "@/components/AnimeSearch";
 import WatchlistSections from "@/components/WatchlistSections";
-import BingeCalculator from "@/components/BingeCalculator";
-import WatchScheduler from "@/components/WatchScheduler";
 
 const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -91,12 +89,6 @@ const Dashboard = () => {
           </h2>
           <AnimeSearch />
         </section>
-
-        {/* Binge Calculator & Watch Scheduler */}
-        <div className="grid lg:grid-cols-2 gap-6">
-          <BingeCalculator userId={session.user.id} />
-          <WatchScheduler userId={session.user.id} />
-        </div>
 
         {/* Watchlist Sections */}
         <WatchlistSections userId={session.user.id} />
