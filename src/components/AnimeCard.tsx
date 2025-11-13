@@ -34,10 +34,11 @@ interface AnimeCardProps {
     notes?: string;
   };
   showAddButton?: boolean;
+  existingInWatchlist?: boolean;
   onUpdate?: () => void;
 }
 
-const AnimeCard = ({ anime, showAddButton, onUpdate }: AnimeCardProps) => {
+const AnimeCard = ({ anime, showAddButton, existingInWatchlist, onUpdate }: AnimeCardProps) => {
   const [status, setStatus] = useState(anime.status);
   const [episodesWatched, setEpisodesWatched] = useState(
     anime.episodes_watched || 0
@@ -121,6 +122,11 @@ const AnimeCard = ({ anime, showAddButton, onUpdate }: AnimeCardProps) => {
   return (
     <div className="card-sketchy p-4 bg-card hover:shadow-lg transition-all sticker">
       <div className="relative mb-3">
+        {existingInWatchlist && (
+          <div className="absolute top-2 right-2 bg-anime-purple text-white px-3 py-1 rounded-full text-xs font-doodle z-10 shadow-md">
+            ✓ In List
+          </div>
+        )}
         <img
           src={anime.anime_image || "/placeholder.svg"}
           alt={anime.anime_title}
