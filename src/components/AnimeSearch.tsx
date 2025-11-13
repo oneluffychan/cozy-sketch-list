@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import AnimeCard from "./AnimeCard";
 import {
   Pagination,
@@ -36,10 +37,29 @@ const AnimeSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [userWatchlist, setUserWatchlist] = useState<number[]>([]);
 
   useEffect(() => {
     fetchTrendingAnime();
+    fetchUserWatchlist();
   }, []);
+
+  const fetchUserWatchlist = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from("watchlist")
+        .select("anime_id")
+        .eq("user_id", session.user.id);
+
+      if (error) throw error;
+      setUserWatchlist(data.map(item => item.anime_id));
+    } catch (error) {
+      console.error("Error fetching watchlist:", error);
+    }
+  };
 
   const fetchTrendingAnime = async () => {
     setLoading(true);
@@ -148,6 +168,8 @@ const AnimeSearch = () => {
                   status: "watch_later",
                 }}
                 showAddButton
+                existingInWatchlist={userWatchlist.includes(anime.mal_id)}
+                onUpdate={fetchUserWatchlist}
               />
             ))}
           </div>
