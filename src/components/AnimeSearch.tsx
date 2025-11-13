@@ -37,7 +37,7 @@ const AnimeSearch = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isSearchMode, setIsSearchMode] = useState(false);
-  const [userWatchlist, setUserWatchlist] = useState<number[]>([]);
+  const [userWatchlistMap, setUserWatchlistMap] = useState<Record<number, string>>({});
 
   useEffect(() => {
     fetchTrendingAnime();
@@ -51,11 +51,15 @@ const AnimeSearch = () => {
 
       const { data, error } = await supabase
         .from("watchlist")
-        .select("anime_id")
+        .select("anime_id, status")
         .eq("user_id", session.user.id);
 
       if (error) throw error;
-      setUserWatchlist(data.map(item => item.anime_id));
+      const watchlistMap: Record<number, string> = {};
+      data.forEach(item => {
+        watchlistMap[item.anime_id] = item.status;
+      });
+      setUserWatchlistMap(watchlistMap);
     } catch (error) {
       console.error("Error fetching watchlist:", error);
     }
@@ -168,7 +172,7 @@ const AnimeSearch = () => {
                   status: "watch_later",
                 }}
                 showAddButton
-                existingInWatchlist={userWatchlist.includes(anime.mal_id)}
+                currentStatus={userWatchlistMap[anime.mal_id]}
                 onUpdate={fetchUserWatchlist}
               />
             ))}

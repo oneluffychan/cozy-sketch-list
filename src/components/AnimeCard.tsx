@@ -34,11 +34,11 @@ interface AnimeCardProps {
     notes?: string;
   };
   showAddButton?: boolean;
-  existingInWatchlist?: boolean;
+  currentStatus?: string;
   onUpdate?: () => void;
 }
 
-const AnimeCard = ({ anime, showAddButton, existingInWatchlist, onUpdate }: AnimeCardProps) => {
+const AnimeCard = ({ anime, showAddButton, currentStatus, onUpdate }: AnimeCardProps) => {
   const [status, setStatus] = useState(anime.status);
   const [episodesWatched, setEpisodesWatched] = useState(
     anime.episodes_watched || 0
@@ -119,14 +119,29 @@ const AnimeCard = ({ anime, showAddButton, existingInWatchlist, onUpdate }: Anim
     }
   };
 
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { error } = await supabase
+        .from("watchlist")
+        .update({ status: newStatus })
+        .eq("user_id", session.user.id)
+        .eq("anime_id", anime.anime_id);
+
+      if (error) throw error;
+      toast.success("Status updated! ✨");
+      if (onUpdate) onUpdate();
+    } catch (error: any) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to update status");
+    }
+  };
+
   return (
     <div className="card-sketchy p-4 bg-card hover:shadow-lg transition-all sticker">
       <div className="relative mb-3">
-        {existingInWatchlist && (
-          <div className="absolute top-2 right-2 bg-anime-purple text-white px-3 py-1 rounded-full text-xs font-doodle z-10 shadow-md">
-            ✓ In List
-          </div>
-        )}
         <img
           src={anime.anime_image || "/placeholder.svg"}
           alt={anime.anime_title}
@@ -162,16 +177,29 @@ const AnimeCard = ({ anime, showAddButton, existingInWatchlist, onUpdate }: Anim
 
       <div className="flex gap-2">
         {showAddButton ? (
-          <Select onValueChange={handleAdd}>
-            <SelectTrigger className="btn-doodle font-doodle">
-              <SelectValue placeholder="Add to..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="watch_later">📺 Watch Later</SelectItem>
-              <SelectItem value="watching">👀 Watching</SelectItem>
-              <SelectItem value="completed">✅ Completed</SelectItem>
-            </SelectContent>
-          </Select>
+          currentStatus ? (
+            <Select value={currentStatus} onValueChange={handleStatusChange}>
+              <SelectTrigger className="btn-doodle font-doodle">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="watch_later">📺 Watch Later</SelectItem>
+                <SelectItem value="watching">👀 Watching</SelectItem>
+                <SelectItem value="completed">✅ Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <Select onValueChange={handleAdd}>
+              <SelectTrigger className="btn-doodle font-doodle">
+                <SelectValue placeholder="Add to..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="watch_later">📺 Watch Later</SelectItem>
+                <SelectItem value="watching">👀 Watching</SelectItem>
+                <SelectItem value="completed">✅ Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          )
         ) : (
           <>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
