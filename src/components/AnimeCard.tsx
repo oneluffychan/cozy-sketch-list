@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Star, Edit2 } from "lucide-react";
 import { toast } from "sonner";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -46,6 +47,28 @@ const AnimeCard = ({ anime, showAddButton, currentStatus, onUpdate }: AnimeCardP
   const [rating, setRating] = useState(anime.rating || 0);
   const [notes, setNotes] = useState(anime.notes || "");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [customWatchlists, setCustomWatchlists] = useState<Array<{ id: string; name: string }>>([]);
+
+  useEffect(() => {
+    fetchCustomWatchlists();
+  }, []);
+
+  const fetchCustomWatchlists = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const { data, error } = await supabase
+        .from("custom_watchlists")
+        .select("id, name")
+        .eq("user_id", session.user.id);
+
+      if (error) throw error;
+      setCustomWatchlists(data || []);
+    } catch (error) {
+      console.error("Error fetching custom watchlists:", error);
+    }
+  };
 
   const handleAdd = async (selectedStatus: string) => {
     try {
@@ -78,6 +101,24 @@ const AnimeCard = ({ anime, showAddButton, currentStatus, onUpdate }: AnimeCardP
     } catch (error) {
       console.error("Error adding anime:", error);
       toast.error("Failed to add anime");
+    }
+  };
+
+  const handleAddToCustomList = async (watchlistId: string) => {
+    try {
+      const { error } = await supabase.from("custom_watchlist_items").insert({
+        watchlist_id: watchlistId,
+        anime_id: anime.anime_id,
+        anime_title: anime.anime_title,
+        anime_image: anime.anime_image,
+        anime_title_japanese: anime.anime_title_japanese,
+      });
+
+      if (error) throw error;
+      toast.success("Added to custom watchlist! 🎉");
+    } catch (error: any) {
+      console.error("Error adding to custom watchlist:", error);
+      toast.error("Failed to add to custom watchlist");
     }
   };
 
@@ -177,29 +218,55 @@ const AnimeCard = ({ anime, showAddButton, currentStatus, onUpdate }: AnimeCardP
 
       <div className="flex gap-2">
         {showAddButton ? (
-          currentStatus ? (
-            <Select value={currentStatus} onValueChange={handleStatusChange}>
-              <SelectTrigger className="btn-doodle font-doodle">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="watch_later">📺 Watch Later</SelectItem>
-                <SelectItem value="watching">👀 Watching</SelectItem>
-                <SelectItem value="completed">✅ Completed</SelectItem>
-              </SelectContent>
-            </Select>
-          ) : (
-            <Select onValueChange={handleAdd}>
-              <SelectTrigger className="btn-doodle font-doodle">
-                <SelectValue placeholder="Add to..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="watch_later">📺 Watch Later</SelectItem>
-                <SelectItem value="watching">👀 Watching</SelectItem>
-                <SelectItem value="completed">✅ Completed</SelectItem>
-              </SelectContent>
-            </Select>
-          )
+          <>
+            {currentStatus ? (
+              <Select value={currentStatus} onValueChange={handleStatusChange}>
+                <SelectTrigger className="btn-doodle font-doodle flex-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="watch_later">📺 Watch Later</SelectItem>
+                  <SelectItem value="watching">👀 Watching</SelectItem>
+                  <SelectItem value="completed">✅ Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <Select onValueChange={handleAdd}>
+                <SelectTrigger className="btn-doodle font-doodle flex-1">
+                  <SelectValue placeholder="Add to..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="watch_later">📺 Watch Later</SelectItem>
+                  <SelectItem value="watching">👀 Watching</SelectItem>
+                  <SelectItem value="completed">✅ Completed</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+            {customWatchlists.length > 0 && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button size="icon" variant="outline" className="btn-doodle">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56">
+                  <div className="space-y-2">
+                    <p className="text-sm font-doodle font-semibold">Add to Custom List:</p>
+                    {customWatchlists.map((list) => (
+                      <Button
+                        key={list.id}
+                        variant="ghost"
+                        className="w-full justify-start font-doodle text-sm"
+                        onClick={() => handleAddToCustomList(list.id)}
+                      >
+                        {list.name}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
+          </>
         ) : (
           <>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

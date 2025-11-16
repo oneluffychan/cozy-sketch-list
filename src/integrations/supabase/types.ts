@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_watchlist_items: {
+        Row: {
+          added_at: string
+          anime_id: number
+          anime_image: string | null
+          anime_title: string
+          anime_title_japanese: string | null
+          id: string
+          notes: string | null
+          watchlist_id: string
+        }
+        Insert: {
+          added_at?: string
+          anime_id: number
+          anime_image?: string | null
+          anime_title: string
+          anime_title_japanese?: string | null
+          id?: string
+          notes?: string | null
+          watchlist_id: string
+        }
+        Update: {
+          added_at?: string
+          anime_id?: number
+          anime_image?: string | null
+          anime_title?: string
+          anime_title_japanese?: string | null
+          id?: string
+          notes?: string | null
+          watchlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_watchlist_items_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "custom_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_watchlists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          name: string
+          share_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name: string
+          share_token?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          name?: string
+          share_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       watchlist: {
         Row: {
           added_date: string | null
