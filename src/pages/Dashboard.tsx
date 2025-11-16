@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Sparkles, User } from "lucide-react";
+import { LogOut, Sparkles, User, List } from "lucide-react";
 import AnimeSearch from "@/components/AnimeSearch";
 import WatchlistSections from "@/components/WatchlistSections";
 
@@ -69,6 +69,14 @@ const Dashboard = () => {
             My Anime List 🌸
           </h1>
           <div className="flex gap-2">
+            <Button
+              onClick={() => navigate("/watchlists")}
+              variant="outline"
+              className="btn-doodle font-doodle"
+            >
+              <List className="w-4 h-4 mr-2" />
+              Custom Lists
+            </Button>
             <Button
               onClick={() => navigate("/profile")}
               variant="outline"
