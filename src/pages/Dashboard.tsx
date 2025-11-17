@@ -4,9 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LogOut, Sparkles, User, List } from "lucide-react";
+import { LogOut, Sparkles, User, List, Tv } from "lucide-react";
 import AnimeSearch from "@/components/AnimeSearch";
-import WatchlistSections from "@/components/WatchlistSections";
 
 const Dashboard = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -70,6 +69,14 @@ const Dashboard = () => {
           </h1>
           <div className="flex gap-2">
             <Button
+              onClick={() => navigate("/my-watchlist")}
+              variant="outline"
+              className="btn-doodle font-doodle"
+            >
+              <Tv className="w-4 h-4 mr-2" />
+              My Watchlist
+            </Button>
+            <Button
               onClick={() => navigate("/watchlists")}
               variant="outline"
               className="btn-doodle font-doodle"
@@ -107,9 +114,6 @@ const Dashboard = () => {
           </h2>
           <AnimeSearch />
         </section>
-
-        {/* Watchlist Sections */}
-        <WatchlistSections userId={session.user.id} />
       </main>
     </div>
   );

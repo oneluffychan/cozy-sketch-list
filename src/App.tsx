@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import MyWatchlist from "./pages/MyWatchlist";
 import CustomWatchlists from "./pages/CustomWatchlists";
 import WatchlistView from "./pages/WatchlistView";
 import SharedWatchlist from "./pages/SharedWatchlist";
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/my-watchlist" element={<MyWatchlist />} />
           <Route path="/watchlists" element={<CustomWatchlists />} />
           <Route path="/watchlist/:id" element={<WatchlistView />} />
           <Route path="/shared/:token" element={<SharedWatchlist />} />
