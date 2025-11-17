@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Share2, Trash2, Edit, Copy, CheckCircle, Eye, Clock } from "lucide-react";
+import { ArrowLeft, Plus, Share2, Trash2, Edit, Copy } from "lucide-react";
 
 interface CustomWatchlist {
   id: string;
@@ -20,17 +20,9 @@ interface CustomWatchlist {
   created_at: string;
 }
 
-interface DefaultWatchlist {
-  status: string;
-  count: number;
-  icon: any;
-  description: string;
-}
-
 const CustomWatchlists = () => {
   const navigate = useNavigate();
   const [watchlists, setWatchlists] = useState<CustomWatchlist[]>([]);
-  const [defaultWatchlists, setDefaultWatchlists] = useState<DefaultWatchlist[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -43,7 +35,6 @@ const CustomWatchlists = () => {
   useEffect(() => {
     checkAuth();
     fetchWatchlists();
-    fetchDefaultWatchlists();
   }, []);
 
   const checkAuth = async () => {
@@ -71,48 +62,6 @@ const CustomWatchlists = () => {
       toast.error("Failed to load watchlists");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchDefaultWatchlists = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      const { data, error } = await supabase
-        .from("watchlist")
-        .select("status")
-        .eq("user_id", session.user.id);
-
-      if (error) throw error;
-
-      const statusCounts = (data || []).reduce((acc: Record<string, number>, item) => {
-        acc[item.status] = (acc[item.status] || 0) + 1;
-        return acc;
-      }, {});
-
-      setDefaultWatchlists([
-        {
-          status: "completed",
-          count: statusCounts["completed"] || 0,
-          icon: CheckCircle,
-          description: "Anime you've finished watching"
-        },
-        {
-          status: "watching",
-          count: statusCounts["watching"] || 0,
-          icon: Eye,
-          description: "Currently watching"
-        },
-        {
-          status: "plan_to_watch",
-          count: statusCounts["plan_to_watch"] || 0,
-          icon: Clock,
-          description: "Anime you plan to watch later"
-        }
-      ]);
-    } catch (error) {
-      console.error("Error fetching default watchlists:", error);
     }
   };
 
@@ -273,40 +222,6 @@ const CustomWatchlists = () => {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
-
-        {/* Default Watchlists */}
-        <div>
-          <h2 className="font-marker text-2xl text-anime-purple mb-4">Default Lists</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            {defaultWatchlists.map((list) => {
-              const Icon = list.icon;
-              const displayName = list.status === "plan_to_watch" ? "Watch Later" : 
-                                  list.status.charAt(0).toUpperCase() + list.status.slice(1);
-              return (
-                <Card 
-                  key={list.status} 
-                  className="card-sketchy sticker hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => navigate("/dashboard")}
-                >
-                  <CardHeader>
-                    <CardTitle className="font-marker flex items-center justify-between">
-                      <span className="flex items-center gap-2">
-                        <Icon className="h-5 w-5" />
-                        {displayName}
-                      </span>
-                      <span className="text-sm bg-anime-purple text-white px-3 py-1 rounded-full">
-                        {list.count}
-                      </span>
-                    </CardTitle>
-                    <CardDescription className="font-doodle">
-                      {list.description}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              );
-            })}
-          </div>
         </div>
 
         {/* Custom Watchlists */}
