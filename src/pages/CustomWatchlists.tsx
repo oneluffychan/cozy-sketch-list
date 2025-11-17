@@ -78,7 +78,6 @@ const CustomWatchlists = () => {
             name: formData.name,
             description: formData.description,
             is_public: formData.is_public,
-            updated_at: new Date().toISOString(),
           })
           .eq("id", editingId)
           .eq("user_id", session.user.id);
