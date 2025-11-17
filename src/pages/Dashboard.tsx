@@ -75,7 +75,7 @@ const Dashboard = () => {
               className="btn-doodle font-doodle"
             >
               <List className="w-4 h-4 mr-2" />
-              Custom Lists
+              My Lists
             </Button>
             <Button
               onClick={() => navigate("/profile")}
