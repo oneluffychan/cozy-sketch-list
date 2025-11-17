@@ -11,10 +11,14 @@ const Index = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsLoggedIn(!!session);
+      if (session) {
+        navigate("/dashboard");
+      } else {
+        setIsLoggedIn(false);
+      }
     };
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 paper-texture relative overflow-hidden">
