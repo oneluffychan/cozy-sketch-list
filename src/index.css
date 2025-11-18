@@ -85,6 +85,93 @@ All colors MUST be HSL.
     --input: 28 20% 35%;
     --ring: 345 80% 75%;
   }
+
+  /* Sakura Dreams Theme - Soft pink cherry blossom aesthetic */
+  [data-theme="sakura"] {
+    --background: 350 100% 98%; /* #FFF5F7 soft pink cream */
+    --foreground: 340 40% 20%; /* #4D2E33 deep rose */
+
+    --card: 350 100% 99%;
+    --card-foreground: 340 40% 20%;
+
+    --primary: 340 85% 75%; /* #F5A3B5 cherry blossom pink */
+    --primary-foreground: 340 40% 20%;
+
+    --secondary: 10 80% 80%; /* #FFD4C2 peach */
+    --secondary-foreground: 340 40% 20%;
+
+    --accent: 330 70% 85%; /* #F8D1E0 soft rose */
+    --accent-foreground: 340 40% 20%;
+
+    --muted: 350 60% 95%;
+    --muted-foreground: 340 30% 50%;
+
+    --border: 340 30% 60%;
+    --input: 340 30% 60%;
+    --ring: 340 85% 75%;
+
+    --anime-pink: 340 85% 75%;
+    --anime-blue: 200 80% 80%;
+    --anime-purple: 310 70% 80%;
+  }
+
+  /* Neon City Theme - Vibrant cyberpunk inspired */
+  [data-theme="neon"] {
+    --background: 240 10% 10%; /* #1A1A24 dark navy */
+    --foreground: 180 100% 90%; /* #CCFFFF bright cyan */
+
+    --card: 240 12% 15%;
+    --card-foreground: 180 100% 90%;
+
+    --primary: 180 100% 60%; /* #00CCCC neon cyan */
+    --primary-foreground: 240 10% 10%;
+
+    --secondary: 300 100% 65%; /* #FF33FF neon magenta */
+    --secondary-foreground: 240 10% 10%;
+
+    --accent: 60 100% 60%; /* #CCCC00 neon yellow */
+    --accent-foreground: 240 10% 10%;
+
+    --muted: 240 8% 20%;
+    --muted-foreground: 180 50% 70%;
+
+    --border: 180 100% 50%;
+    --input: 180 100% 50%;
+    --ring: 180 100% 60%;
+
+    --anime-pink: 300 100% 65%;
+    --anime-blue: 180 100% 60%;
+    --anime-purple: 270 100% 65%;
+  }
+
+  /* Minimal Zen Theme - Clean and simple */
+  [data-theme="minimal"] {
+    --background: 0 0% 100%; /* pure white */
+    --foreground: 0 0% 10%; /* near black */
+
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 10%;
+
+    --primary: 0 0% 20%; /* dark gray */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 90%; /* light gray */
+    --secondary-foreground: 0 0% 10%;
+
+    --accent: 0 0% 70%; /* medium gray */
+    --accent-foreground: 0 0% 10%;
+
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
+
+    --border: 0 0% 85%;
+    --input: 0 0% 85%;
+    --ring: 0 0% 20%;
+
+    --anime-pink: 0 0% 50%;
+    --anime-blue: 0 0% 40%;
+    --anime-purple: 0 0% 30%;
+  }
 }
 
 @layer base {

@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, User, Mail, TrendingUp, Heart, Clock, CheckCircle } from "lucide-react";
+import { ArrowLeft, User, Mail, TrendingUp, Heart, Clock, CheckCircle, Palette } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { themes } from "@/lib/themes";
 
 interface WatchlistStats {
   total: number;
@@ -29,6 +31,7 @@ const Profile = () => {
     totalEpisodesWatched: 0,
   });
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -263,6 +266,47 @@ const Profile = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Theme Selection */}
+        <Card className="card-sketchy bg-card">
+          <CardHeader>
+            <CardTitle className="font-handwritten text-2xl flex items-center gap-2">
+              <Palette className="w-6 h-6" />
+              Choose Your Theme
+            </CardTitle>
+            <CardDescription className="font-doodle">
+              Customize your anime tracker experience
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.entries(themes).map(([key, themeData]) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setTheme(key as any);
+                    toast.success(`Theme changed to ${themeData.name}! 🎨`);
+                  }}
+                  className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    theme === key
+                      ? "border-anime-purple bg-anime-purple/10 shadow-lg scale-105"
+                      : "border-border hover:border-anime-purple/50 hover:bg-muted"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-3xl">{themeData.icon}</span>
+                    <div>
+                      <h3 className="font-handwritten text-lg">{themeData.name}</h3>
+                      <p className="text-sm text-muted-foreground font-doodle">
+                        {themeData.description}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Completion Progress */}
         <Card className="card-sketchy bg-card">
