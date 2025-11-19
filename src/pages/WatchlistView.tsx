@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Star } from "lucide-react";
 import AnimeCard from "@/components/AnimeCard";
 
 interface WatchlistItem {
@@ -32,6 +32,8 @@ const WatchlistView = () => {
   const [items, setItems] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -42,6 +44,7 @@ const WatchlistView = () => {
   const fetchWatchlist = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      setCurrentUserId(session?.user.id || null);
 
       const { data: watchlistData, error: watchlistError } = await supabase
         .from("custom_watchlists")
@@ -53,6 +56,18 @@ const WatchlistView = () => {
 
       setWatchlist(watchlistData);
       setIsOwner(session?.user.id === watchlistData.user_id);
+
+      // Check if current user has saved this watchlist
+      if (session?.user.id && session.user.id !== watchlistData.user_id) {
+        const { data: savedData } = await supabase
+          .from("saved_watchlists")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .eq("watchlist_id", id)
+          .maybeSingle();
+        
+        setIsSaved(!!savedData);
+      }
 
       const { data: itemsData, error: itemsError } = await supabase
         .from("custom_watchlist_items")
@@ -88,6 +103,40 @@ const WatchlistView = () => {
     }
   };
 
+  const handleToggleSave = async () => {
+    if (!currentUserId || isOwner) return;
+
+    try {
+      if (isSaved) {
+        // Unsave
+        const { error } = await supabase
+          .from("saved_watchlists")
+          .delete()
+          .eq("user_id", currentUserId)
+          .eq("watchlist_id", id);
+
+        if (error) throw error;
+        setIsSaved(false);
+        toast.success("Removed from saved watchlists");
+      } else {
+        // Save
+        const { error } = await supabase
+          .from("saved_watchlists")
+          .insert({
+            user_id: currentUserId,
+            watchlist_id: id,
+          });
+
+        if (error) throw error;
+        setIsSaved(true);
+        toast.success("Added to saved watchlists! ⭐");
+      }
+    } catch (error) {
+      console.error("Error toggling save:", error);
+      toast.error("Failed to update saved status");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-anime-cream flex items-center justify-center">
@@ -117,35 +166,46 @@ const WatchlistView = () => {
   return (
     <div className="min-h-screen bg-anime-cream p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => navigate(isOwner ? "/watchlists" : "/dashboard")}
-            className="btn-doodle"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="font-marker text-4xl text-anime-purple">{watchlist.name}</h1>
-              {watchlist.is_public && (
-                <span className="text-xs bg-anime-purple text-white px-2 py-1 rounded-full">
-                  Public
-                </span>
-              )}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate(isOwner ? "/watchlists" : "/dashboard")}
+              className="btn-doodle"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="font-marker text-4xl text-anime-purple">{watchlist.name}</h1>
+                {watchlist.is_public && (
+                  <span className="text-xs bg-anime-purple text-white px-2 py-1 rounded-full">
+                    Public
+                  </span>
+                )}
+              </div>
             </div>
             {watchlist.description && (
               <p className="text-gray-600 font-doodle">{watchlist.description}</p>
             )}
           </div>
-          {isOwner && (
+          {isOwner ? (
             <Button
               onClick={() => navigate("/dashboard")}
               className="btn-doodle"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Anime
+            </Button>
+          ) : currentUserId && (
+            <Button
+              onClick={handleToggleSave}
+              className={isSaved ? "btn-doodle" : "btn-doodle-outline"}
+              variant={isSaved ? "default" : "outline"}
+            >
+              <Star className={`h-4 w-4 mr-2 ${isSaved ? "fill-current" : ""}`} />
+              {isSaved ? "Saved" : "Save"}
             </Button>
           )}
         </div>
