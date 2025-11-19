@@ -112,6 +112,35 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_watchlists: {
+        Row: {
+          id: string
+          saved_at: string
+          user_id: string
+          watchlist_id: string
+        }
+        Insert: {
+          id?: string
+          saved_at?: string
+          user_id: string
+          watchlist_id: string
+        }
+        Update: {
+          id?: string
+          saved_at?: string
+          user_id?: string
+          watchlist_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_watchlists_watchlist_id_fkey"
+            columns: ["watchlist_id"]
+            isOneToOne: false
+            referencedRelation: "custom_watchlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       watchlist: {
         Row: {
           added_date: string | null

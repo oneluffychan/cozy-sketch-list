@@ -6,9 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, User, Mail, TrendingUp, Heart, Clock, CheckCircle, Palette } from "lucide-react";
+import { ArrowLeft, User, Mail, TrendingUp, Heart, Clock, CheckCircle, Palette, Star } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { themes } from "@/lib/themes";
+
+interface SavedWatchlist {
+  id: string;
+  watchlist_id: string;
+  saved_at: string;
+  custom_watchlists: {
+    id: string;
+    name: string;
+    description: string | null;
+    user_id: string;
+  };
+}
 
 interface WatchlistStats {
   total: number;
@@ -30,6 +42,7 @@ const Profile = () => {
     averageRating: 0,
     totalEpisodesWatched: 0,
   });
+  const [savedWatchlists, setSavedWatchlists] = useState<SavedWatchlist[]>([]);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
@@ -40,6 +53,7 @@ const Profile = () => {
         navigate("/auth");
       } else {
         fetchStats(session.user.id);
+        fetchSavedWatchlists(session.user.id);
       }
       setLoading(false);
     });
@@ -90,6 +104,31 @@ const Profile = () => {
     } catch (error) {
       console.error("Error fetching stats:", error);
       toast.error("Failed to load statistics");
+    }
+  };
+
+  const fetchSavedWatchlists = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("saved_watchlists")
+        .select(`
+          id,
+          watchlist_id,
+          saved_at,
+          custom_watchlists (
+            id,
+            name,
+            description,
+            user_id
+          )
+        `)
+        .eq("user_id", userId)
+        .order("saved_at", { ascending: false });
+
+      if (error) throw error;
+      setSavedWatchlists(data || []);
+    } catch (error) {
+      console.error("Error fetching saved watchlists:", error);
     }
   };
 
@@ -359,6 +398,44 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Saved Watchlists */}
+        {savedWatchlists.length > 0 && (
+          <Card className="card-sketchy bg-card">
+            <CardHeader>
+              <CardTitle className="font-handwritten text-2xl flex items-center gap-2">
+                <Star className="h-6 w-6 fill-anime-purple text-anime-purple" />
+                Saved Watchlists
+              </CardTitle>
+              <CardDescription className="font-doodle">
+                Watchlists you've starred from others
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {savedWatchlists.map((saved) => (
+                  <button
+                    key={saved.id}
+                    onClick={() => navigate(`/watchlist/${saved.watchlist_id}`)}
+                    className="w-full text-left p-4 rounded-lg border-2 border-border hover:border-anime-purple/50 hover:bg-muted transition-all"
+                  >
+                    <h3 className="font-handwritten text-lg text-foreground mb-1">
+                      {saved.custom_watchlists.name}
+                    </h3>
+                    {saved.custom_watchlists.description && (
+                      <p className="text-sm text-muted-foreground font-doodle line-clamp-2">
+                        {saved.custom_watchlists.description}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground font-doodle mt-2">
+                      Saved {new Date(saved.saved_at).toLocaleDateString()}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
